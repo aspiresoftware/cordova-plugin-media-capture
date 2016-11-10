@@ -72,6 +72,9 @@ public class Capture extends CordovaPlugin {
 //    private static final int CAPTURE_INVALID_ARGUMENT = 2;
     private static final int CAPTURE_NO_MEDIA_FILES = 3;
     private static final int CAPTURE_PERMISSION_DENIED = 4;
+    private static final int CAPTURE_NO_APPLICATION_ERR = 5;
+
+    private static final String NO_APPLICATION_TO_RECORD_AUDIO = "NO_APPLICATION_TO_RECORD_AUDIO";
 
     private boolean cameraPermissionInManifest;     // Whether or not the CAMERA permission is declared in AndroidManifest.xml
 
@@ -225,9 +228,14 @@ public class Capture extends CordovaPlugin {
       if (!PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
           PermissionHelper.requestPermission(this, req.requestCode, Manifest.permission.READ_EXTERNAL_STORAGE);
       } else {
+        try{
           Intent intent = new Intent(android.provider.MediaStore.Audio.Media.RECORD_SOUND_ACTION);
 
           this.cordova.startActivityForResult((CordovaPlugin) this, intent, req.requestCode);
+        } catch(Exception ex){
+          pendingRequests.resolveWithFailure(req, createErrorObject(CAPTURE_NO_APPLICATION_ERR, NO_APPLICATION_TO_RECORD_AUDIO));
+
+        }
       }
     }
 
